@@ -1,0 +1,65 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<script>
+    function Click(id, action) {
+        if(action !== "Archive" || confirm('Are you sure you want to archive this task?'))
+            $.ajax({
+                url: ('@Url.Action("REPLACE", "Tasks")'.replace('REPLACE', action)),
+                type: 'POST',
+                data: { TaskId: id }
+            }).done(function ()
+            {
+                if (action === 'Archive')
+                    document.getElementById('tr_' + id).style.display = "none";
+                else if (action === 'Complete')
+                {
+                    document.getElementById('td_complete_' + id).style.display = "";
+                    document.getElementById('td_incomplete_' + id).style.display = "none";
+                }
+                else if (action === 'Incomplete')
+                {
+                    document.getElementById('td_complete_' + id).style.display = "none";
+                    document.getElementById('td_incomplete_' + id).style.display = "";
+                }
+            });
+    }
+</script>
+
+<div class="row">
+    <!-- List of Tasks -->
+    <h2>Tasks</h2>
+    <table>
+        <tr class="header">
+            <td class="empty"></td>
+            <td class="empty"></td>
+            <td>Description</td>
+        </tr>
+        @if (Model != null)
+        {
+            var added = false;
+            foreach (var t in Model)
+            {
+                <tr id="tr_@t.TaskId">
+                    <td><i class="fas fa-archive" onclick="Click(@t.TaskId,'Archive')"></i></td>
+                    <td id="td_incomplete_@t.TaskId" style="display:@(t.Completed == null ? "" : "none");"><i class="far fa-square" onclick="Click(@t.TaskId,'Complete')"></i></td>
+                    <td id="td_complete_@t.TaskId" style="display:@(t.Completed == null ? "none" : "");"><i class="far fa-check-square" onclick="Click(@t.TaskId,'Incomplete')"></i></td>
+                    <td>@t.Text</td>
+                </tr>
+
+                added = true;
+            }
+
+            if (!added)
+            {
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td style="display:none;"></td>
+                    <td>No tasks found.</td>
+                </tr>
+            }
+        }
+    </table>
+</div>
